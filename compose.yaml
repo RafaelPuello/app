@@ -3,13 +3,27 @@ name: app-service
 services:
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+      target: prod
     ports:
       - "3000:3000"
     depends_on:
       - backend
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.app-frontend.rule=Host(`app.digidex.bio`)"
+    #   - "traefik.http.routers.app-frontend.rule=PathPrefix(`/plants`) || PathPrefix(`/_next`)"
+    #   - "traefik.http.routers.app-frontend.entrypoints=web"
+    #   - "traefik.http.routers.app-frontend.priority=100"
+    #   - "traefik.http.services.app-frontend.loadbalancer.server.port=3000"
+
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+      target: prod
     ports:
       - "8000:8000"
