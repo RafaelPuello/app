@@ -27,6 +27,8 @@ services:
       target: prod
     ports:
       - "8003:8003"
+    networks:
+      - digidex-net
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app-backend.rule=Host(`app.digidex.bio`)"
@@ -36,5 +38,5 @@ services:
       - "traefik.http.services.app-backend.loadbalancer.server.port=8003"
 
 networks:
-  web:
+  digidex-net:
     external: true
