@@ -1,5 +1,9 @@
 name: app-service
 
+secrets:
+  jwt_public_key:
+    file: ../secrets/public_key.pem
+
 services:
   app-frontend:
     container_name: app-frontend
