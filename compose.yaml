@@ -31,6 +31,10 @@ services:
       target: prod
     networks:
       - digidex-net
+    secrets:
+      - jwt_public_key
+    environment:
+      - JWT_PUBLIC_KEY_PATH=/run/secrets/jwt_public_key
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app-backend.rule=Host(`app.digidex.bio`)"

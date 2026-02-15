@@ -1,6 +1,10 @@
 # CLAUDE.md - DigiDex App Service
 
-This file provides guidance to Claude Code (claude.ai/code) when working with the App service.
+**Service-specific guides:**
+- **Backend**: See `/app/backend/CLAUDE.md` for detailed Django backend architecture, API endpoints, testing, and database setup
+- **Frontend**: See `/app/frontend/CLAUDE.md` for Next.js frontend pages, components, styling, and development
+
+This file provides overall service context.
 
 ## Project Overview
 
@@ -97,88 +101,27 @@ app/
 
 ## Frontend Architecture
 
-### Pages & Routing
+Next.js 16 + React 19 + TypeScript application with:
+- App Router based pages (home, dashboard, plants)
+- TypeScript for type safety across components
+- Tailwind CSS v4 for utility-first styling
+- API clients for NFC tags and GBIF integration
+- Path alias `@/` for clean imports pointing to `src/`
 
-The frontend uses Next.js App Router with TypeScript:
+Component organization: Reusable React components in `src/components/`, pages in `src/app/`, utilities and API clients in `src/lib/`
 
-- `app/page.tsx` - Home page
-- `app/dashboard/` - User dashboard and collection management
-- `app/plants/` - Plant listing and detail pages
-- Components follow standard React composition patterns
+See `/app/frontend/CLAUDE.md` for page structure, component organization, styling configuration, and development workflows.
 
-### TypeScript Configuration
+## Backend Architecture
 
-```json
-{
-  "baseUrl": "./src",
-  "paths": {
-    "@/*": ["./*"]
-  }
-}
-```
+Django 6.0 backend with REST API for NFC tags and plant collections via django-ninja. Lightweight service focused on API endpoints rather than serving templates. Features:
+- Domain-based app structure (domain, nfctags, botany)
+- PlantLabel model for plant collections
+- REST API at `/api/` with Swagger documentation
+- Pytest-based testing with API parity checks
+- Session and JWT authentication support
 
-The `@/` path alias resolves to `/src` for cleaner imports:
-```typescript
-import { MyComponent } from '@/components/MyComponent';
-```
-
-### Styling
-
-- **Tailwind CSS** (v4) for utility-first styling
-- **PostCSS** for CSS processing
-- Global styles in `src/styles/`
-- Component styles colocated with component files
-
-### Dependencies
-
-**React/Next.js Stack**:
-- `next` 16.0.7 - Framework and tooling
-- `react` 19.2.1 - UI library
-- `react-dom` 19.2.1 - React DOM utilities
-- `tailwindcss` 4.1.17 - Styling framework
-- `typescript` 5.9.3 - Type safety
-
-**Development**:
-- `eslint` - Code linting
-- `@types/*` - TypeScript definitions
-
-## Backend
-
-The Django backend is minimal and serves several purposes:
-
-1. **Serve the Next.js frontend** - Acts as static file server
-2. **Proxy API requests** - Routes to CMS and other microservices
-3. **Handle authentication** - Integrates with the ID service
-4. **Manage configuration** - Provides settings to frontend
-
-### Key Files
-
-- `config/settings.py` - All Django configuration (dev/prod)
-- `config/urls.py` - URL routing and static file serving
-- `config/wsgi.py` - WSGI application entry point
-- `config/asgi.py` - ASGI application entry point
-- `manage.py` - Django management command entry point
-
-### Configuration
-
-All settings are in a single `config/settings.py` file. Environment-specific configuration can be achieved via environment variables:
-
-```bash
-# Development
-DEBUG=True python manage.py runserver
-
-# Production
-DEBUG=False gunicorn config.wsgi
-```
-
-### Static Files
-
-The backend serves static assets and media:
-
-```bash
-# Collect static files for production
-python manage.py collectstatic --noinput
-```
+See `/app/backend/CLAUDE.md` for detailed configuration, API endpoints, testing patterns, and database setup.
 
 ## Linting & Code Quality
 
