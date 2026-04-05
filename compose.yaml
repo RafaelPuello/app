@@ -8,8 +8,8 @@ services:
   app-frontend:
     container_name: app-frontend
     build:
-      context: ./frontend/
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: app/frontend/Dockerfile
       target: prod
     ports:
       - "3001:3001"
