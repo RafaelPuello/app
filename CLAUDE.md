@@ -161,16 +161,19 @@ cd backend
 
 ## API Communication
 
-The frontend communicates with the CMS and other services through:
+The frontend communicates with backend services through Traefik routing:
 
-1. **Direct API calls** - To CMS backend at `/api/` (via Traefik proxy)
-2. **Authentication** - Via the ID service
-3. **Data fetching** - REST endpoints from CMS
+1. **App backend API** - `GET /app/api/nfctags`, `GET /app/api/gbif/*` (App backend)
+2. **Authentication** - Via the ID service at `/accounts/` and `/_allauth/`
+3. **CMS data** - REST endpoints from CMS at `/api/` (CMS backend)
 
 The Traefik reverse proxy (in development and production) handles routing:
+- `/app/api/*` → App backend:8000 (no path stripping; Django handles full `/app/api/` prefix)
+- `/app/*` → App frontend:3000
 - `/api/*` → CMS backend:8000
-- `/accounts/*` → ID service backend:8000
-- All other paths → App frontend:3000
+- `/accounts/*`, `/_allauth/*` → ID service backend:8001
+
+**Important:** Traefik does NOT strip the `/app` path prefix when forwarding to the backend. Django URL config mounts the API at `'app/api/'` to match the full path received.
 
 ## Environment Variables
 
@@ -195,6 +198,25 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 ```
 
 ## Docker & Deployment
+
+### Network Configuration
+
+Both `app-frontend` and `app-backend` must be on the `digidex-net` external Docker network so Traefik can discover them and route traffic. This is declared in `compose.yaml` with:
+
+```yaml
+networks:
+  - digidex-net
+```
+
+on both services, and at the file level:
+
+```yaml
+networks:
+  digidex-net:
+    external: true
+```
+
+The `compose.override.yaml` does not re-declare networks; it inherits the `digidex-net` assignment from the base file when both files are merged. This matches the same pattern used by the ID service (`id/compose.yaml` / `id/compose.override.yaml`).
 
 ### Local Development
 

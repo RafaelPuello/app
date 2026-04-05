@@ -15,12 +15,15 @@ services:
       - "3001:3001"
     depends_on:
       - app-backend
+    networks:
+      - digidex-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app-frontend.rule=Host(`app.digidex.bio`)"
-      - "traefik.http.routers.app-frontend.rule=PathPrefix(`/plants`) || PathPrefix(`/_next`)"
-      - "traefik.http.routers.app-frontend.entrypoints=web"
+      - "traefik.http.routers.app-frontend.rule=Host(`digidex.bio`) && PathPrefix(`/app`)"
       - "traefik.http.routers.app-frontend.priority=100"
+      - "traefik.http.routers.app-frontend.entrypoints=websecure"
+      - "traefik.http.routers.app-frontend.tls=true"
+      - "traefik.http.routers.app-frontend.tls.certresolver=le"
       - "traefik.http.services.app-frontend.loadbalancer.server.port=3001"
 
   app-backend:
@@ -37,10 +40,11 @@ services:
       - JWT_PUBLIC_KEY_PATH=/run/secrets/jwt_public_key
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app-backend.rule=Host(`app.digidex.bio`)"
-      - "traefik.http.routers.app-backend.rule=PathPrefix(`/api`)"
-      - "traefik.http.routers.app-backend.entrypoints=web"
-      - "traefik.http.routers.app-backend.priority=100"
+      - "traefik.http.routers.app-backend.rule=Host(`digidex.bio`) && PathPrefix(`/app/api`)"
+      - "traefik.http.routers.app-backend.priority=200"
+      - "traefik.http.routers.app-backend.entrypoints=websecure"
+      - "traefik.http.routers.app-backend.tls=true"
+      - "traefik.http.routers.app-backend.tls.certresolver=le"
       - "traefik.http.services.app-backend.loadbalancer.server.port=8003"
 
 networks:
