@@ -263,12 +263,13 @@ export default function MyPage() {
 2. Export component
 3. Import and use in pages or other components
 
-### Update Tailwind Config
+### Update Styling
 
-Edit `tailwind.config.ts` to customize theme:
-- Colors, fonts, spacing
-- Breakpoints, animations
-- Plugin configuration
+The app/frontend uses the shared SCSS design system (see `/app/frontend/CLAUDE.md` and `/app/frontend/STYLING.md` for details). To customize styles:
+
+- **Colors & themes:** Edit `/shared/styles/scss/abstracts/_variables.scss` — CSS custom properties like `--heading`, `--paragraph`, `--accent-a1` apply across all services
+- **Component styles:** Add to `/shared/styles/scss/components/` or create co-located page SCSS modules
+- **Responsive design:** Use the `respond-to()` mixin from `/shared/styles/scss/abstracts/_mixins.scss`
 
 ### Install Dependencies
 
@@ -321,6 +322,6 @@ python manage.py shell
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [React Documentation](https://react.dev)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Shared SCSS Design System](../../shared/styles/CLAUDE.md)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Django Documentation](https://docs.djangoproject.com/)
