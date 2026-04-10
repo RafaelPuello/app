@@ -13,7 +13,7 @@ The App service is the main user-facing application for DigiDex. It combines a D
 ## Service Composition
 
 - **Backend**: Django 6.0 (lightweight, serves Next.js and API proxy)
-- **Frontend**: Next.js 16 + React 19 + Tailwind CSS (full application UI)
+- **Frontend**: Next.js 16 + React 19 + Shared SCSS (full application UI)
 
 ## Development Setup
 
@@ -104,7 +104,7 @@ app/
 Next.js 16 + React 19 + TypeScript application with:
 - App Router based pages (home, dashboard, plants)
 - TypeScript for type safety across components
-- Tailwind CSS v4 for utility-first styling
+- Shared SCSS design system for styling (via `src/styles` symlink to `shared/styles`)
 - API clients for NFC tags and GBIF integration
 - Path alias `@/` for clean imports pointing to `src/`
 
