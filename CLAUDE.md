@@ -268,7 +268,7 @@ export default function MyPage() {
 The app/frontend uses the shared SCSS design system (see `/app/frontend/CLAUDE.md` and `/app/frontend/STYLING.md` for details). To customize styles:
 
 - **Colors & themes:** Edit `/shared/styles/scss/abstracts/_variables.scss` — CSS custom properties like `--heading`, `--paragraph`, `--accent-a1` apply across all services
-- **Component styles:** Add to `/shared/styles/scss/components/` or create co-located page SCSS modules
+- **Component styles:** Add to `/shared/styles/scss/components/` — see `/app/frontend/STYLING.md` for the consumer-only policy
 - **Responsive design:** Use the `respond-to()` mixin from `/shared/styles/scss/abstracts/_mixins.scss`
 
 ### Install Dependencies
