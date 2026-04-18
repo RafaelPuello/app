@@ -148,9 +148,11 @@ cd backend
 
 ```bash
 cd frontend
-# Testing setup can be added with jest/vitest
-# Currently: manual testing recommended during development
+npm test                  # Run all Jest tests
+npm run test:coverage     # Run with coverage report
 ```
+
+See `frontend/CLAUDE.md` for full Jest configuration details and testing patterns.
 
 ### Backend
 
