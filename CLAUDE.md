@@ -110,7 +110,15 @@ Next.js 16 + React 19 + TypeScript application with:
 
 Component organization: Reusable React components in `src/components/`, pages in `src/app/`, utilities and API clients in `src/lib/`
 
-See `/app/frontend/CLAUDE.md` for page structure, component organization, styling configuration, and development workflows.
+**Sidebar Navigation (Phase 2-4)**:
+The app features a responsive sidebar with phase-based enhancements:
+- **Phase 2**: Mobile hamburger menu + tablet collapse (responsive design)
+- **Phase 3**: Auth integration with logout + user menu
+- **Phase 4**: Glassmorphic redesign with desktop collapse-to-icon-only mode and flyout popovers
+
+The sidebar wraps all pages via the root layout and provides persistent navigation. On desktop, toggle collapse with the chevron button (60px icon-only mode). On tablet/mobile, toggle visibility via hamburger menu.
+
+See `/app/frontend/CLAUDE.md` for detailed sidebar architecture, component structure, state management, and development workflows.
 
 ## Backend Architecture
 
