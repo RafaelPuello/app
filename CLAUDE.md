@@ -1,337 +1,51 @@
 # CLAUDE.md - DigiDex App Service
 
-**Service-specific guides:**
-- **Backend**: See `/app/backend/CLAUDE.md` for detailed Django backend architecture, API endpoints, testing, and database setup
-- **Frontend**: See `/app/frontend/CLAUDE.md` for Next.js frontend pages, components, styling, and development
+Next.js 16 frontend + Django 6.0 backend for main user-facing application (NFC tag management, plant discovery via Pokedex).
 
-This file provides overall service context.
+**Detailed guides:**
+- **Backend**: See `/app/backend/CLAUDE.md` for Django architecture, API contracts, models, database
+- **Frontend**: See `/app/frontend/CLAUDE.md` for Next.js pages, React components, sidebar, styling
 
-## Project Overview
+## Quick Setup
 
-The App service is the main user-facing application for DigiDex. It combines a Django backend (minimal, mainly for serving the frontend) with a Next.js 16 frontend that provides the primary user interface for managing collections and interacting with NFC tags.
+Backend: `cd app/backend && pip install -r requirements.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000`
 
-## Service Composition
+Frontend: `cd app/frontend && npm install && npm run dev`
 
-- **Backend**: Django 6.0 (lightweight, serves Next.js and API proxy)
-- **Frontend**: Next.js 16 + React 19 + Shared SCSS (full application UI)
+Docker: `docker compose -f compose.yaml -f compose.override.yaml up`
 
-## Development Setup
+See README.md for full setup instructions and command reference.
 
-### Backend
+## Architecture
 
-```bash
-cd app/backend
+- **Backend**: Django 6.0 + django-ninja REST API at `/app/api/` (NFC tags, plant collections, GBIF integration)
+- **Frontend**: Next.js 16 + React 19 at `/app/` (pages: dashboard, plants, home)
+- **Auth**: JWT tokens from ID service; validated by backend
+- **Data flow**: Frontend → `/app/api/*` (backend) → `/accounts/*`, `/_allauth/*` (ID service)
+- **Routing**: Traefik path-based (no stripping); Django handles full `/app/api/` prefix; Next.js `basePath: '/app'`
+- **Network**: Both on `digidex-net` external Docker network (Traefik discovery)
+- **NFC Features**: Bind/unbind endpoints; PlantLabel model (concrete NFC tag)
+- **Pokedex**: Plant search (curated seed + GBIF API); PokedexGrid + PlantForm + NFCScanner components
 
-# Install dependencies
-pip install -r requirements.txt
+## Conventions
 
-# Run development server
-python manage.py runserver 0.0.0.0:8000
-```
+- API endpoints: RESTful, typed schemas, JWT auth decorators on non-public routes
+- Frontend: TypeScript, functional components, React Context for state, `@/` path alias
+- Sidebar: Phase 2-4 (responsive mobile hamburger + tablet collapse + glassmorphic desktop)
+- Shared styling: `/app/frontend/src/styles` symlinks to `/shared/styles` (design tokens, mixins)
 
-**Settings**: `app/backend/config/settings.py` (single settings file for dev/prod)
+## Gotchas
 
-### Frontend
+- **Traefik path handling**: Routes `/app/api/*` WITHOUT stripping. Django URL config must mount at `'app/api/'` to match full path received.
+- **basePath required**: Next.js needs `basePath: '/app'` in config for assets and routing to work behind Traefik.
+- **Shared styles symlink**: Frontend expects `src/styles` → `../../shared/styles`. If missing, SCSS imports fail.
+- **Port 8000**: Same as CMS backend. Traefik priority rules distinguish them.
 
-```bash
-cd app/frontend
+## Key Files
 
-# Install dependencies
-npm install
-
-# Development server (port 3000)
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production build locally
-npm start
-
-# Linting
-npm run lint
-```
-
-**Ports**:
-- Frontend: 3000 (development)
-- Backend: 8000
-
-### Docker Compose (Development)
-
-```bash
-# From app/ directory
-docker compose -f compose.yaml -f compose.override.yaml up
-```
-
-## Project Structure
-
-```
-app/
-├── backend/                  # Django application
-│   ├── config/              # Django settings and URL config
-│   │   ├── settings.py      # Main Django settings
-│   │   ├── asgi.py
-│   │   ├── wsgi.py
-│   │   └── urls.py
-│   ├── manage.py
-│   └── requirements.txt
-│
-├── frontend/                # Next.js application
-│   ├── src/
-│   │   ├── app/            # Next.js App Router pages
-│   │   │   ├── dashboard/  # Dashboard pages
-│   │   │   ├── plants/     # Plant listing/management
-│   │   │   └── page.tsx    # Home page
-│   │   ├── components/     # Reusable React components
-│   │   ├── lib/            # Utilities and types
-│   │   │   └── interfaces/ # TypeScript interfaces
-│   │   └── styles/         # Global CSS
-│   ├── public/             # Static assets
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── next.config.ts
-│   └── README.md
-│
-├── .github/                # GitHub Actions workflows
-├── compose.yaml
-├── compose.override.yaml    # Development overrides
-└── .gitmodules
-
-```
-
-## Frontend Architecture
-
-Next.js 16 + React 19 + TypeScript application with:
-- App Router based pages (home, dashboard, plants)
-- TypeScript for type safety across components
-- Shared SCSS design system for styling (via `src/styles` symlink to `shared/styles`)
-- API clients for NFC tags and GBIF integration
-- Path alias `@/` for clean imports pointing to `src/`
-
-Component organization: Reusable React components in `src/components/`, pages in `src/app/`, utilities and API clients in `src/lib/`
-
-**Sidebar Navigation (Phase 2-4)**:
-The app features a responsive sidebar with phase-based enhancements:
-- **Phase 2**: Mobile hamburger menu + tablet collapse (responsive design)
-- **Phase 3**: Auth integration with logout + user menu
-- **Phase 4**: Glassmorphic redesign with desktop collapse-to-icon-only mode and flyout popovers
-
-The sidebar wraps all pages via the root layout and provides persistent navigation. On desktop, toggle collapse with the chevron button (60px icon-only mode). On tablet/mobile, toggle visibility via hamburger menu.
-
-See `/app/frontend/CLAUDE.md` for detailed sidebar architecture, component structure, state management, and development workflows.
-
-## Backend Architecture
-
-Django 6.0 backend with REST API for NFC tags and plant collections via django-ninja. Lightweight service focused on API endpoints rather than serving templates. Features:
-- Domain-based app structure (domain, nfctags, botany)
-- PlantLabel model for plant collections
-- REST API at `/api/` with Swagger documentation
-- Pytest-based testing with API parity checks
-- Session and JWT authentication support
-
-See `/app/backend/CLAUDE.md` for detailed configuration, API endpoints, testing patterns, and database setup.
-
-## Linting & Code Quality
-
-### Frontend (Next.js/ESLint)
-
-```bash
-cd frontend
-npm run lint          # Check for linting issues
-npm run lint -- --fix # Auto-fix issues (if supported)
-```
-
-**ESLint Config**: `eslint.config.mjs`
-
-### Backend (Django)
-
-```bash
-cd backend
-# (Minimal - main app is frontend-focused)
-```
-
-## Testing
-
-### Frontend
-
-```bash
-cd frontend
-npm test                  # Run all Jest tests
-npm run test:coverage     # Run with coverage report
-```
-
-See `frontend/CLAUDE.md` for full Jest configuration details and testing patterns.
-
-### Backend
-
-```bash
-cd backend
-# Tests can be added as the backend grows
-```
-
-## API Communication
-
-The frontend communicates with backend services through Traefik routing:
-
-1. **App backend API** - `GET /app/api/nfctags`, `GET /app/api/gbif/*` (App backend)
-2. **Authentication** - Via the ID service at `/accounts/` and `/_allauth/`
-3. **CMS data** - REST endpoints from CMS at `/api/` (CMS backend)
-
-The Traefik reverse proxy (in development and production) handles routing:
-- `/app/api/*` → App backend:8000 (no path stripping; Django handles full `/app/api/` prefix)
-- `/app/*` → App frontend:3000
-- `/api/*` → CMS backend:8000
-- `/accounts/*`, `/_allauth/*` → ID service backend:8001
-
-**Important:** Traefik does NOT strip the `/app` path prefix when forwarding to the backend. Django URL config mounts the API at `'app/api/'` to match the full path received.
-
-## Environment Variables
-
-### Frontend
-
-Create `.env.local` for local overrides:
-
-```bash
-# API configuration
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
-```
-
-### Backend
-
-Set via environment or `.env` file:
-
-```bash
-DEBUG=True
-SECRET_KEY=your-secret-key
-DATABASE_URL=sqlite:///db.sqlite3
-ALLOWED_HOSTS=localhost,127.0.0.1
-```
-
-## Docker & Deployment
-
-### Network Configuration
-
-Both `app-frontend` and `app-backend` must be on the `digidex-net` external Docker network so Traefik can discover them and route traffic. This is declared in `compose.yaml` with:
-
-```yaml
-networks:
-  - digidex-net
-```
-
-on both services, and at the file level:
-
-```yaml
-networks:
-  digidex-net:
-    external: true
-```
-
-The `compose.override.yaml` does not re-declare networks; it inherits the `digidex-net` assignment from the base file when both files are merged. This matches the same pattern used by the ID service (`id/compose.yaml` / `id/compose.override.yaml`).
-
-### Local Development
-
-```bash
-docker compose -f compose.yaml -f compose.override.yaml up
-```
-
-The `compose.override.yaml` enables hot reloading for development.
-
-### Production Build
-
-1. **Frontend**: Next.js builds to `.next` directory
-2. **Backend**: Serves frontend and static assets
-3. **Docker**: Multi-stage build optimizes image size
-
-Build:
-```bash
-docker build -t digidex-app:latest .
-```
-
-## Common Tasks
-
-### Add a New Page
-
-1. Create file in `src/app/[feature]/page.tsx`
-2. Export default React component
-3. Add navigation link in layout/header
-
-Example:
-```typescript
-// src/app/mypage/page.tsx
-export default function MyPage() {
-  return (
-    <main>
-      <h1>My Page</h1>
-    </main>
-  );
-}
-```
-
-### Add a New Component
-
-1. Create file in `src/components/MyComponent.tsx`
-2. Export component
-3. Import and use in pages or other components
-
-### Update Styling
-
-The app/frontend uses the shared SCSS design system (see `/app/frontend/CLAUDE.md` and `/app/frontend/STYLING.md` for details). To customize styles:
-
-- **Colors & themes:** Edit `/shared/styles/scss/abstracts/_variables.scss` — CSS custom properties like `--heading`, `--paragraph`, `--accent-a1` apply across all services
-- **Component styles:** Add to `/shared/styles/scss/components/` — see `/app/frontend/STYLING.md` for the consumer-only policy
-- **Responsive design:** Use the `respond-to()` mixin from `/shared/styles/scss/abstracts/_mixins.scss`
-
-### Install Dependencies
-
-```bash
-# Frontend
-cd frontend
-npm install <package-name>
-
-# Backend
-cd backend
-pip install <package-name>
-pip freeze > requirements.txt
-```
-
-## Troubleshooting
-
-### Port Already in Use
-
-```bash
-# Find and kill process on port 3000
-lsof -ti:3000 | xargs kill -9
-
-# Or specify different port
-npm run dev -- -p 3001
-```
-
-### Next.js Build Errors
-
-```bash
-# Clear build cache
-rm -rf .next
-
-# Rebuild
-npm run build
-```
-
-### Django Issues
-
-```bash
-# Check migrations
-python manage.py showmigrations
-
-# Check settings
-python manage.py shell
->>> from django.conf import settings
->>> print(settings.DEBUG)
-```
-
-## Documentation Links
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Documentation](https://react.dev)
-- [Shared SCSS Design System](../../shared/styles/CLAUDE.md)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Django Documentation](https://docs.djangoproject.com/)
+- Backend settings: `app/backend/config/settings.py`
+- Backend API: `app/backend/config/api.py` (django-ninja router)
+- Frontend config: `app/frontend/next.config.ts`
+- Sidebar: `app/frontend/src/components/sidebar/` (complex state machine + context)
+- Models: `app/backend/domain/models.py`, `app/backend/nfctags/models.py`
+- API routes: `app/backend/config/urls.py` (mounts at `'app/api/'`)
