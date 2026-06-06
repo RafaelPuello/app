@@ -36,8 +36,8 @@ See README.md for full setup instructions and command reference.
 
 ## Gotchas
 
-- **Traefik path handling**: Routes `/app/api/*` WITHOUT stripping. Django URL config must mount at `'app/api/'` to match full path received.
-- **basePath required**: Next.js needs `basePath: '/app'` in config for assets and routing to work behind Traefik.
+- **Traefik path handling**: Routes `/app/*` WITHOUT stripping the path prefix. See `.claude/rules/traefik-path-handling.md` for the complete contract and common mistakes.
+- **basePath required**: Next.js needs `basePath: '/app'` in config for assets and routing to work behind Traefik (covered in traefik rule).
 - **Shared styles symlink**: Frontend expects `src/styles` → `../../shared/styles`. If missing, SCSS imports fail.
 - **Port 8000**: Same as CMS backend. Traefik priority rules distinguish them.
 
